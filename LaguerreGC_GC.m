@@ -1,4 +1,4 @@
-function [ GC , llsdata , N , L ] =  LaguerreGC_rightdrop(data,alpha,orders)
+function [ GC ] =  LaguerreGC_rightdrop(data,alpha,orders)
 
 	[ N , L ] = size(data);
 	if (N<L); data=data'; end;
@@ -13,15 +13,12 @@ function [ GC , llsdata , N , L ] =  LaguerreGC_rightdrop(data,alpha,orders)
 	sdata = normalize(data,1);
 	llsdata = LaguerreGC_convolve(sdata,alpha,orders);
 
-%	i->j
-
+%	Unrestricted models
 	predictees=sdata(maxdrop+1:end,:);
 	obsMatrix=llsdata(maxdrop:end-1,:,:);
-
-%	size(obsMatrix)
-
 	[ globalcovD , globalAA ] = LaguerreGC_lfit(predictees,obsMatrix);
 
+%	Restricted models
 	ve=1:L;
 	for j=1:L
 		predictees=sdata(maxdrop+1:end,ve(ve~=j));
@@ -30,6 +27,7 @@ function [ GC , llsdata , N , L ] =  LaguerreGC_rightdrop(data,alpha,orders)
 		restrictedcovD(:,:,j) = covD;
 	end
 
+%	Strength is calculated as log ratio of variances
 	for i=1:L
 		for j=1:L
 			if (i==j)
